@@ -67,3 +67,7 @@ pids
 # IDE
 .idea/
 *.sln.iml
+
+# Environment variables
+.env
+.env.*
