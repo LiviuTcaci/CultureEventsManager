@@ -9,9 +9,11 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Stack
 } from '@mui/material';
 import { AccountCircle } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
+import NotificationBell from '../Notifications/NotificationBell';
 
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -66,16 +68,19 @@ const Navbar = () => {
 
           {isAuthenticated ? (
             <>
-              <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleMenu}
-                color="inherit"
-              >
-                <AccountCircle />
-              </IconButton>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <NotificationBell color="inherit" />
+                <IconButton
+                  size="large"
+                  aria-label="account of current user"
+                  aria-controls="menu-appbar"
+                  aria-haspopup="true"
+                  onClick={handleMenu}
+                  color="inherit"
+                >
+                  <AccountCircle />
+                </IconButton>
+              </Stack>
               <Menu
                 id="menu-appbar"
                 anchorEl={anchorEl}

@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material';
 import Layout from './components/Layout/Layout';
 import { AuthProvider } from './context/AuthContext';
+import { NotificationProvider } from './context/NotificationContext';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 
 // Pages
@@ -44,8 +45,9 @@ function App() {
     <Router>
       <ThemeProvider theme={theme}>
         <AuthProvider>
-          <Layout>
-            <Routes>
+          <NotificationProvider>
+            <Layout>
+              <Routes>
               {/* Public routes */}
               <Route path="/" element={<Home />} />
               <Route path="/events" element={<EventsPage />} />
@@ -64,8 +66,9 @@ function App() {
               <Route element={<ProtectedRoute requiredRole="Admin" />}>
                 <Route path="/admin" element={<AdminPanel />} />
               </Route>
-            </Routes>
-          </Layout>
+              </Routes>
+            </Layout>
+          </NotificationProvider>
         </AuthProvider>
       </ThemeProvider>
     </Router>
