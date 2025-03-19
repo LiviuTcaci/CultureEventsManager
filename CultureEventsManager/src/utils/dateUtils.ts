@@ -50,6 +50,26 @@ export const formatShortDate = (dateString: string): string => {
 };
 
 /**
+ * Formats a number as currency
+ * @param amount Number to format
+ * @param currency Currency code (default: USD)
+ * @returns Formatted currency string (e.g. "$25.00")
+ */
+export const formatCurrency = (amount: number, currency: string = 'USD'): string => {
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
+  } catch (error) {
+    console.error('Error formatting currency:', error);
+    return `${amount}`;
+  }
+};
+
+/**
  * Gets the relative time from now (e.g. "5 days ago", "in 2 hours")
  * @param dateString ISO date string
  * @returns Relative time string

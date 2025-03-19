@@ -310,6 +310,7 @@ const EventDetailsPage: React.FC = () => {
                   fullWidth 
                   size="large"
                   disabled={event.status === 'Completed'}
+                  onClick={() => navigate(`/events/${eventId}/tickets`)}
                 >
                   Get Tickets
                 </Button>

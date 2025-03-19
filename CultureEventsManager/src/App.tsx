@@ -12,6 +12,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AdminPanel from './pages/AdminPanel';
 import ProfilePage from './pages/ProfilePage';
+import TicketPurchasePage from './pages/TicketPurchasePage';
 
 // Placeholder components - to be implemented later
 const Venues = () => <div>Venues Page</div>;
@@ -49,6 +50,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/events" element={<EventsPage />} />
               <Route path="/events/:eventId" element={<EventDetailsPage />} />
+              <Route path="/events/:eventId/tickets" element={<TicketPurchasePage />} />
               <Route path="/venues" element={<Venues />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />

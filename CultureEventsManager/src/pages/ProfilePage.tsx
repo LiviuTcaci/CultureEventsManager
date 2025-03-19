@@ -31,12 +31,14 @@ import {
   Bookmark as BookmarkIcon,
   EventAvailable as EventIcon,
   Star as StarIcon,
-  Delete as DeleteIcon
+  Delete as DeleteIcon,
+  ConfirmationNumber as TicketIcon
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { Event, User } from '../types/models';
 import { formatShortDate } from '../utils/dateUtils';
 import { profileService } from '../services/profileService';
+import UserTickets from '../components/Tickets/UserTickets';
 
 // TabPanel component for the profile tabs
 interface TabPanelProps {
@@ -249,6 +251,12 @@ const ProfilePage: React.FC = () => {
                 label="Attended Events"
                 {...a11yProps(1)}
               />
+              <Tab
+                icon={<TicketIcon />}
+                iconPosition="start"
+                label="My Tickets"
+                {...a11yProps(2)}
+              />
             </Tabs>
           </Box>
           
@@ -419,6 +427,25 @@ const ProfilePage: React.FC = () => {
                   ))}
                 </List>
               )}
+            </Box>
+          </TabPanel>
+          
+          {/* My Tickets Tab */}
+          <TabPanel value={activeTab} index={2}>
+            <Box sx={{ px: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                Your Tickets
+              </Typography>
+              <UserTickets 
+                onTicketCanceled={() => {
+                  // Refresh attended events when a ticket is canceled
+                  if (user) {
+                    profileService.getAttendedEvents(user.id)
+                      .then(events => setAttendedEvents(events))
+                      .catch(err => console.error('Error refreshing attended events:', err));
+                  }
+                }}
+              />
             </Box>
           </TabPanel>
         </Paper>
