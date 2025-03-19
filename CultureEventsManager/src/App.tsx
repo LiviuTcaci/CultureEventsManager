@@ -7,6 +7,7 @@ import ProtectedRoute from './components/Auth/ProtectedRoute';
 // Pages
 import Home from './pages/Home';
 import EventsPage from './pages/EventsPage';
+import EventDetailsPage from './pages/EventDetailsPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 
@@ -47,7 +48,7 @@ function App() {
               {/* Public routes */}
               <Route path="/" element={<Home />} />
               <Route path="/events" element={<EventsPage />} />
-              <Route path="/events/:eventId" element={<div>Event Details Page (Coming Soon)</div>} />
+              <Route path="/events/:eventId" element={<EventDetailsPage />} />
               <Route path="/venues" element={<Venues />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
