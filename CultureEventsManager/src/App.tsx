@@ -10,11 +10,11 @@ import EventsPage from './pages/EventsPage';
 import EventDetailsPage from './pages/EventDetailsPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import AdminPanel from './pages/AdminPanel';
 
 // Placeholder components - to be implemented later
 const Venues = () => <div>Venues Page</div>;
 const Profile = () => <div>Profile Page</div>;
-const AdminPanel = () => <div>Admin Panel</div>;
 
 const theme = createTheme({
   palette: {
