@@ -14,25 +14,35 @@ import {
   Card,
   CardContent,
   Stack,
-  Rating
+  Rating,
+  Snackbar
 } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import GroupIcon from '@mui/icons-material/Group';
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { Event, Venue } from '../types/models';
 import { eventService } from '../services/eventService';
 import { formatDate, getRelativeTime } from '../utils/dateUtils';
 import { mockVenues } from '../services/mockData';
+import { useAuth } from '../context/AuthContext';
+import { profileService } from '../services/profileService';
 
 const EventDetailsPage: React.FC = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   
   const [event, setEvent] = useState<Event | null>(null);
   const [venue, setVenue] = useState<Venue | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSaved, setIsSaved] = useState<boolean>(false);
+  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
+  const [snackbarMessage, setSnackbarMessage] = useState<string>('');
 
+  // Fetch event details
   useEffect(() => {
     const fetchEventDetails = async () => {
       if (!eventId) {
@@ -62,9 +72,56 @@ const EventDetailsPage: React.FC = () => {
 
     fetchEventDetails();
   }, [eventId]);
+  
+  // Check if event is saved in user's profile
+  useEffect(() => {
+    const checkIfSaved = () => {
+      if (isAuthenticated && user && eventId) {
+        const isEventSaved = user.savedEventIds.includes(eventId);
+        setIsSaved(isEventSaved);
+      }
+    };
+    
+    checkIfSaved();
+  }, [isAuthenticated, user, eventId]);
 
   const handleBackToEvents = () => {
     navigate('/events');
+  };
+  
+  // Toggle save/unsave event
+  const handleToggleSaveEvent = async () => {
+    if (!isAuthenticated || !user || !eventId) {
+      // Redirect to login if not authenticated
+      navigate('/login');
+      return;
+    }
+    
+    try {
+      if (isSaved) {
+        // Remove from saved events
+        await profileService.removeSavedEvent(user.id, eventId);
+        setIsSaved(false);
+        setSnackbarMessage('Event removed from saved events');
+      } else {
+        // Add to saved events
+        await profileService.addSavedEvent(user.id, eventId);
+        setIsSaved(true);
+        setSnackbarMessage('Event saved to your profile');
+      }
+      
+      // Show notification
+      setSnackbarOpen(true);
+    } catch (err) {
+      console.error('Error toggling save event:', err);
+      setSnackbarMessage('Failed to update saved events');
+      setSnackbarOpen(true);
+    }
+  };
+  
+  // Handle closing the snackbar
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
   };
 
   if (loading) {
@@ -90,6 +147,13 @@ const EventDetailsPage: React.FC = () => {
 
   return (
     <Container maxWidth="lg">
+      {/* Notification Snackbar */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        message={snackbarMessage}
+      />
       <Box sx={{ py: 4 }}>
         {/* Navigation */}
         <Box sx={{ mb: 4 }}>
@@ -238,15 +302,28 @@ const EventDetailsPage: React.FC = () => {
               
               <Divider sx={{ my: 2 }} />
               
-              <Button 
-                variant="contained" 
-                fullWidth 
-                size="large"
-                sx={{ mt: 2 }}
-                disabled={event.status === 'Completed'}
-              >
-                Get Tickets
-              </Button>
+              <Stack spacing={2} sx={{ mt: 2 }}>
+                <Button 
+                  variant="contained" 
+                  fullWidth 
+                  size="large"
+                  disabled={event.status === 'Completed'}
+                >
+                  Get Tickets
+                </Button>
+                
+                {isAuthenticated && (
+                  <Button
+                    variant={isSaved ? "outlined" : "text"}
+                    color="primary"
+                    fullWidth
+                    startIcon={isSaved ? <BookmarkIcon /> : <BookmarkBorderIcon />}
+                    onClick={handleToggleSaveEvent}
+                  >
+                    {isSaved ? 'Saved to Profile' : 'Save Event'}
+                  </Button>
+                )}
+              </Stack>
             </Paper>
             
             {/* Venue Info */}

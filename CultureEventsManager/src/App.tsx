@@ -11,10 +11,10 @@ import EventDetailsPage from './pages/EventDetailsPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AdminPanel from './pages/AdminPanel';
+import ProfilePage from './pages/ProfilePage';
 
 // Placeholder components - to be implemented later
 const Venues = () => <div>Venues Page</div>;
-const Profile = () => <div>Profile Page</div>;
 
 const theme = createTheme({
   palette: {
@@ -55,7 +55,7 @@ function App() {
               
               {/* Protected routes - require authentication */}
               <Route element={<ProtectedRoute />}>
-                <Route path="/profile" element={<Profile />} />
+                <Route path="/profile" element={<ProfilePage />} />
               </Route>
               
               {/* Admin routes - require admin role */}
