@@ -2,14 +2,16 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material';
 import Layout from './components/Layout/Layout';
 import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/Auth/ProtectedRoute';
 
+// Pages
 import Home from './pages/Home';
 import EventsPage from './pages/EventsPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 
-// Placeholder components - vom crea aceste componente mai târziu
+// Placeholder components - to be implemented later
 const Venues = () => <div>Venues Page</div>;
-const Login = () => <div>Login Page</div>;
-const Register = () => <div>Register Page</div>;
 const Profile = () => <div>Profile Page</div>;
 const AdminPanel = () => <div>Admin Panel</div>;
 
@@ -42,14 +44,23 @@ function App() {
         <AuthProvider>
           <Layout>
             <Routes>
+              {/* Public routes */}
               <Route path="/" element={<Home />} />
               <Route path="/events" element={<EventsPage />} />
               <Route path="/events/:eventId" element={<div>Event Details Page (Coming Soon)</div>} />
               <Route path="/venues" element={<Venues />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/admin" element={<AdminPanel />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              
+              {/* Protected routes - require authentication */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="/profile" element={<Profile />} />
+              </Route>
+              
+              {/* Admin routes - require admin role */}
+              <Route element={<ProtectedRoute requiredRole="Admin" />}>
+                <Route path="/admin" element={<AdminPanel />} />
+              </Route>
             </Routes>
           </Layout>
         </AuthProvider>

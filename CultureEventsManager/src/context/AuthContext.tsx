@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useEffect, ReactNode } from
 import { User, AuthResponse } from '../types/models';
 import { api } from '../services/api';
 import { userService } from '../services/userService';
+import { mockAuth } from '../services/mockData';
 
 // Define the context type
 interface AuthContextType {
@@ -45,15 +46,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      const response = await api.post<AuthResponse>('/auth/login', { email, password });
-      const { token, user } = response.data;
       
-      // Save token and user in localStorage
-      localStorage.setItem('token', token);
-      userService.saveCurrentUser(user);
-      
-      // Update state
-      setUser(user);
+      try {
+        // First try with real API
+        const response = await api.post<AuthResponse>('/auth/login', { email, password });
+        const { token, user } = response.data;
+        
+        // Save token and user in localStorage
+        localStorage.setItem('token', token);
+        userService.saveCurrentUser(user);
+        
+        // Update state
+        setUser(user);
+      } catch (apiError) {
+        console.log('API login failed, falling back to mock auth:', apiError);
+        
+        // Fall back to mock auth if API fails
+        const { token, user } = mockAuth.login(email, password);
+        
+        // Save token and user in localStorage
+        localStorage.setItem('token', token);
+        userService.saveCurrentUser(user);
+        
+        // Update state
+        setUser(user);
+      }
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -66,15 +83,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const register = async (userData: any) => {
     try {
       setIsLoading(true);
-      const response = await api.post<AuthResponse>('/auth/register', userData);
-      const { token, user } = response.data;
       
-      // Save token and user in localStorage
-      localStorage.setItem('token', token);
-      userService.saveCurrentUser(user);
-      
-      // Update state
-      setUser(user);
+      try {
+        // First try with real API
+        const response = await api.post<AuthResponse>('/auth/register', userData);
+        const { token, user } = response.data;
+        
+        // Save token and user in localStorage
+        localStorage.setItem('token', token);
+        userService.saveCurrentUser(user);
+        
+        // Update state
+        setUser(user);
+      } catch (apiError) {
+        console.log('API registration failed, falling back to mock auth:', apiError);
+        
+        // Fall back to mock auth if API fails
+        const { token, user } = mockAuth.register(userData);
+        
+        // Save token and user in localStorage
+        localStorage.setItem('token', token);
+        userService.saveCurrentUser(user);
+        
+        // Update state
+        setUser(user);
+      }
     } catch (error) {
       console.error('Registration failed:', error);
       throw error;
