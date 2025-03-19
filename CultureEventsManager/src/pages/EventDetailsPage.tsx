@@ -14,7 +14,7 @@ import {
   Card,
   CardContent,
   Stack,
-  Rating,
+  Rating as MuiRating,
   Snackbar
 } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -28,6 +28,8 @@ import { formatDate, getRelativeTime } from '../utils/dateUtils';
 import { mockVenues } from '../services/mockData';
 import { useAuth } from '../context/AuthContext';
 import { profileService } from '../services/profileService';
+import RatingsSection from '../components/Ratings/RatingsSection';
+import CommentsSection from '../components/Ratings/CommentsSection';
 
 const EventDetailsPage: React.FC = () => {
   const { eventId } = useParams<{ eventId: string }>();
@@ -179,7 +181,7 @@ const EventDetailsPage: React.FC = () => {
             />
             {event.averageRating > 0 && (
               <Stack direction="row" spacing={0.5} alignItems="center">
-                <Rating 
+                <MuiRating 
                   value={event.averageRating} 
                   precision={0.5} 
                   readOnly 
@@ -373,6 +375,25 @@ const EventDetailsPage: React.FC = () => {
             )}
           </Grid>
         </Grid>
+        
+        {/* Ratings & Comments Sections */}
+        <Box sx={{ mt: 4 }}>
+          {/* Ratings Section */}
+          <RatingsSection 
+            eventId={event.id}
+            totalRatings={event.ratingCount}
+            averageRating={event.averageRating}
+            onRatingSubmitted={() => {
+              // Refresh event data when a rating is submitted
+              eventService.getEventById(event.id).then(updatedEvent => {
+                setEvent(updatedEvent);
+              });
+            }}
+          />
+          
+          {/* Comments Section */}
+          <CommentsSection eventId={event.id} />
+        </Box>
       </Box>
     </Container>
   );
