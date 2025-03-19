@@ -10,13 +10,13 @@ namespace CultureEvents.API.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string? Id { get; set; }
 
-        [BsonElement("created_at")]
+        [BsonElement("createdAt")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        [BsonElement("updated_at")]
+        [BsonElement("updatedAt")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-        [BsonElement("is_deleted")]
+        [BsonElement("isDeleted")]
         public bool IsDeleted { get; set; } = false;
     }
 }

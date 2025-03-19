@@ -18,10 +18,10 @@ namespace CultureEvents.API.Data
             var client = new MongoClient(settings.Value.ConnectionString);
             var database = client.GetDatabase(settings.Value.DatabaseName);
             
-            // Use the class name as collection name, with lowercase first letter
-            string collectionName = typeof(T).Name;
-            collectionName = char.ToLowerInvariant(collectionName[0]) + collectionName.Substring(1);
+            // Use the class name as collection name, in plural form
+            string collectionName = typeof(T).Name + "s";
             
+            // Try to get the collection
             _collection = database.GetCollection<T>(collectionName);
         }
 
