@@ -4,9 +4,9 @@ import Layout from './components/Layout/Layout';
 import { AuthProvider } from './context/AuthContext';
 
 import Home from './pages/Home';
+import EventsPage from './pages/EventsPage';
 
 // Placeholder components - vom crea aceste componente mai târziu
-const Events = () => <div>Events Page</div>;
 const Venues = () => <div>Venues Page</div>;
 const Login = () => <div>Login Page</div>;
 const Register = () => <div>Register Page</div>;
@@ -43,7 +43,8 @@ function App() {
           <Layout>
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/events" element={<Events />} />
+              <Route path="/events" element={<EventsPage />} />
+              <Route path="/events/:eventId" element={<div>Event Details Page (Coming Soon)</div>} />
               <Route path="/venues" element={<Venues />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
