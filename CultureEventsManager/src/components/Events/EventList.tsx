@@ -4,14 +4,25 @@ import { useNavigate } from 'react-router-dom';
 import EventCard from './EventCard';
 import { Event } from '../../types/models';
 import { eventService } from '../../services/eventService';
+import { mockVenues } from '../../services/mockData';
 
 interface EventListProps {
   categoryId?: string;
   searchQuery?: string;
   limit?: number;
+  location?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
-const EventList: React.FC<EventListProps> = ({ categoryId, searchQuery, limit }) => {
+const EventList: React.FC<EventListProps> = ({ 
+  categoryId, 
+  searchQuery, 
+  limit,
+  location,
+  startDate,
+  endDate 
+}) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,11 +34,39 @@ const EventList: React.FC<EventListProps> = ({ categoryId, searchQuery, limit })
         setLoading(true);
         let fetchedEvents: Event[];
         
-        if (searchQuery && searchQuery.trim() !== '') {
+        // If we have advanced filter criteria
+        if (categoryId || location || startDate || endDate) {
+          // Prepare filter object
+          const filters: {
+            categoryId?: string;
+            venueId?: string;
+            startDate?: string;
+            endDate?: string;
+            status?: string;
+          } = {};
+          
+          if (categoryId) filters.categoryId = categoryId;
+          if (startDate) filters.startDate = startDate;
+          if (endDate) filters.endDate = endDate;
+          
+          fetchedEvents = await eventService.filterEvents(filters);
+          
+          // If we have a location filter, we need to filter the results locally
+          // since the API doesn't directly support filtering by city
+          if (location) {
+            fetchedEvents = fetchedEvents.filter(event => {
+              // Find the venue by ID to check its city
+              const venue = mockVenues.find(v => v.id === event.venueId);
+              return venue?.city === location;
+            });
+          }
+        }
+        // If we have a search query
+        else if (searchQuery && searchQuery.trim() !== '') {
           fetchedEvents = await eventService.searchEvents(searchQuery);
-        } else if (categoryId) {
-          fetchedEvents = await eventService.getEventsByCategory(categoryId);
-        } else {
+        } 
+        // Default: fetch all events
+        else {
           fetchedEvents = await eventService.getAllEvents();
         }
         
@@ -45,7 +84,7 @@ const EventList: React.FC<EventListProps> = ({ categoryId, searchQuery, limit })
     };
 
     fetchEvents();
-  }, [categoryId, searchQuery, limit]);
+  }, [categoryId, searchQuery, limit, location, startDate, endDate]);
 
   const handleViewDetails = (eventId: string) => {
     navigate(`/events/${eventId}`);

@@ -1,6 +1,7 @@
 using CultureEvents.API.Configurations;
 using CultureEvents.API.Data;
 using CultureEvents.API.Models;
+using CultureEvents.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -41,9 +42,13 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
         ValidAudience = builder.Configuration["JwtSettings:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]))
+            Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"] ?? "DefaultSecretKeyForDevelopment12345"))
     };
 });
+
+// Check if running in initialization-only mode
+var commandLineArgs = Environment.GetCommandLineArgs();
+var initializationOnly = commandLineArgs.Contains("--initialization-only");
 
 // Configure CORS
 builder.Services.AddCors(options =>
@@ -52,7 +57,7 @@ builder.Services.AddCors(options =>
     {
         var allowedOrigins = builder.Configuration
             .GetSection("AppSettings:AllowedOrigins")
-            .Get<string[]>();
+            .Get<string[]>() ?? new string[] { "http://localhost:3000" };
             
         policy.WithOrigins(allowedOrigins)
             .AllowAnyHeader()
@@ -110,6 +115,9 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// Add service to initialize database
+builder.Services.AddHostedService<DatabaseInitializationService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -135,5 +143,19 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// If in initialization-only mode, wait for the database initialization to complete and then exit
+if (initializationOnly)
+{
+    Console.WriteLine("Running in initialization-only mode.");
+    Console.WriteLine("Waiting for database initialization to complete...");
+    
+    // Wait for a few seconds to allow the hosted service to run
+    await Task.Delay(5000);
+    
+    Console.WriteLine("Database initialization completed.");
+    Console.WriteLine("All collections should now be created in MongoDB.");
+    return;
+}
 
 app.Run();

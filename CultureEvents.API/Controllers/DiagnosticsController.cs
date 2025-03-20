@@ -91,14 +91,15 @@ namespace CultureEvents.API.Controllers
                 var database = client.GetDatabase(_settings.DatabaseName);
                 var categoryCollection = database.GetCollection<Category>("categories");
                 
+                var now = DateTime.UtcNow;
                 var category = new Category
                 {
                     Id = Guid.NewGuid().ToString(),
-                    Name = "Test Category " + DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
+                    Name = "Test Category " + now.ToString("yyyy-MM-dd HH:mm:ss"),
                     Description = "Created by diagnostics controller",
                     Icon = "test_icon",
-                    CreatedAt = DateTime.UtcNow.ToString("o"),
-                    UpdatedAt = DateTime.UtcNow.ToString("o"),
+                    CreatedAt = now,
+                    UpdatedAt = now,
                     IsDeleted = false
                 };
 

@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "fyo0THBNlxI=",
+  "dgSpecHash": "2FlvzLvwiAY=",
   "success": true,
   "projectFilePath": "/Users/ly/Documents/University/AN3/S6/(PS)ProiectareSoftware/PS_L/PS_Proiect/CultureEventsProject/CultureEvents.API/CultureEvents.API.csproj",
   "expectedPackageFiles": [
+    "/Users/ly/.nuget/packages/bcrypt.net-next/4.0.3/bcrypt.net-next.4.0.3.nupkg.sha512",
     "/Users/ly/.nuget/packages/dnsclient/1.6.1/dnsclient.1.6.1.nupkg.sha512",
     "/Users/ly/.nuget/packages/fluentvalidation/11.5.1/fluentvalidation.11.5.1.nupkg.sha512",
     "/Users/ly/.nuget/packages/fluentvalidation.aspnetcore/11.3.0/fluentvalidation.aspnetcore.11.3.0.nupkg.sha512",

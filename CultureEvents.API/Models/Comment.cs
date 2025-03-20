@@ -6,16 +6,16 @@ namespace CultureEvents.API.Models
     public class Comment : BaseEntity
     {
         [BsonElement("user_id")]
-        public string UserId { get; set; }
+        public required string UserId { get; set; }
 
         [BsonElement("event_id")]
-        public string EventId { get; set; }
+        public required string EventId { get; set; }
 
         [BsonElement("content")]
-        public string Content { get; set; }
+        public required string Content { get; set; }
 
         [BsonElement("parent_id")]
-        public string ParentId { get; set; } // For replies to other comments
+        public required string ParentId { get; set; } // For replies to other comments
 
         [BsonElement("status")]
         public string Status { get; set; } = "Active"; // Active, Hidden, Removed

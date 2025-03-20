@@ -6,19 +6,19 @@ namespace CultureEvents.API.Models
     public class User : BaseEntity
     {
         [BsonElement("username")]
-        public string Username { get; set; }
+        public required string Username { get; set; }
 
         [BsonElement("email")]
-        public string Email { get; set; }
+        public required string Email { get; set; }
 
         [BsonElement("password_hash")]
-        public string PasswordHash { get; set; }
+        public required string PasswordHash { get; set; }
 
         [BsonElement("full_name")]
-        public string FullName { get; set; }
+        public required string FullName { get; set; }
 
         [BsonElement("profile_picture")]
-        public string ProfilePicture { get; set; }
+        public required string ProfilePicture { get; set; }
 
         [BsonElement("role")]
         public string Role { get; set; } = "User"; // User, Organizer, Admin

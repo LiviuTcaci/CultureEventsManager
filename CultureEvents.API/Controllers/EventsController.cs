@@ -1,6 +1,8 @@
 using CultureEvents.API.Data;
 using CultureEvents.API.Models;
 using CultureEvents.API.Models.DTOs;
+// Explicitly specify which PaginatedResult to use
+using DTOPaginatedResult = CultureEvents.API.Models.DTOs.PaginatedResult<CultureEvents.API.Models.Event>;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -32,8 +34,8 @@ namespace CultureEvents.API.Controllers
         /// Gets all events with optional pagination
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(PaginatedResult<Event>), 200)]
-        public async Task<ActionResult<PaginatedResult<Event>>> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        [ProducesResponseType(typeof(DTOPaginatedResult), 200)]
+        public async Task<ActionResult<DTOPaginatedResult>> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             if (page < 1) page = 1;
             if (pageSize < 1 || pageSize > 50) pageSize = 10;
@@ -42,7 +44,7 @@ namespace CultureEvents.API.Controllers
             
             var events = (await _eventRepository.GetAllAsync())
                 .Where(e => !e.IsDeleted)
-                .OrderByDescending(e => DateTime.Parse(e.StartDate))
+                .OrderByDescending(e => e.StartDate)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
@@ -121,8 +123,8 @@ namespace CultureEvents.API.Controllers
                 OrganizerId = eventDto.OrganizerId,
                 CategoryId = eventDto.CategoryId,
                 VenueId = eventDto.VenueId,
-                StartDate = eventDto.StartDate.ToUniversalTime().ToString("o"),
-                EndDate = eventDto.EndDate.ToUniversalTime().ToString("o"),
+                StartDate = eventDto.StartDate,
+                EndDate = eventDto.EndDate,
                 ImageUrls = eventDto.ImageUrls,
                 Status = eventDto.Status,
                 Capacity = eventDto.Capacity,
@@ -198,10 +200,10 @@ namespace CultureEvents.API.Controllers
                 existingEvent.VenueId = eventDto.VenueId;
                 
             if (eventDto.StartDate.HasValue)
-                existingEvent.StartDate = eventDto.StartDate.Value.ToUniversalTime().ToString("o");
+                existingEvent.StartDate = eventDto.StartDate.Value;
                 
             if (eventDto.EndDate.HasValue)
-                existingEvent.EndDate = eventDto.EndDate.Value.ToUniversalTime().ToString("o");
+                existingEvent.EndDate = eventDto.EndDate.Value;
                 
             if (eventDto.ImageUrls != null)
                 existingEvent.ImageUrls = eventDto.ImageUrls;
@@ -224,7 +226,7 @@ namespace CultureEvents.API.Controllers
                     DurationMinutes = pd.DurationMinutes
                 }).ToList();
             
-            existingEvent.UpdatedAt = DateTime.UtcNow.ToString("o");
+            existingEvent.UpdatedAt = DateTime.UtcNow;
             
             await _eventRepository.UpdateAsync(existingEvent);
             
@@ -267,7 +269,7 @@ namespace CultureEvents.API.Controllers
             var events = (await _eventRepository.FindAsync(e => 
                     !e.IsDeleted && 
                     (e.Status == "Announced" || e.Status == "Ongoing")))
-                .Where(e => DateTime.Parse(e.StartDate) > now)
+                .Where(e => e.StartDate > now)
                 .OrderBy(e => e.StartDate)
                 .Take(limit)
                 .ToList();
@@ -300,7 +302,7 @@ namespace CultureEvents.API.Controllers
             
             var events = (await _eventRepository.FindAsync(e => 
                     !e.IsDeleted && e.CategoryId == categoryId))
-                .OrderByDescending(e => DateTime.Parse(e.StartDate))
+                .OrderByDescending(e => e.StartDate)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
@@ -341,7 +343,7 @@ namespace CultureEvents.API.Controllers
             
             var events = (await _eventRepository.FindAsync(e => 
                     !e.IsDeleted && e.VenueId == venueId))
-                .OrderByDescending(e => DateTime.Parse(e.StartDate))
+                .OrderByDescending(e => e.StartDate)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
@@ -380,7 +382,7 @@ namespace CultureEvents.API.Controllers
                 .Where(e => !e.IsDeleted && (
                     e.Title.ToLower().Contains(lowerTerm) ||
                     e.Description.ToLower().Contains(lowerTerm)))
-                .OrderByDescending(e => DateTime.Parse(e.StartDate));
+                .OrderByDescending(e => e.StartDate);
             
             var totalCount = filteredEvents.Count();
             
@@ -404,8 +406,8 @@ namespace CultureEvents.API.Controllers
         /// Filters events by various criteria
         /// </summary>
         [HttpPost("filter")]
-        [ProducesResponseType(typeof(PaginatedResult<Event>), 200)]
-        public async Task<ActionResult<PaginatedResult<Event>>> Filter([FromBody] EventFilterDTO filter)
+        [ProducesResponseType(typeof(DTOPaginatedResult), 200)]
+        public async Task<ActionResult<DTOPaginatedResult>> Filter([FromBody] EventFilterDTO filter)
         {
             if (filter == null)
             {
@@ -442,14 +444,14 @@ namespace CultureEvents.API.Controllers
             
             if (filter.StartDateFrom.HasValue)
             {
-                var startDateFrom = filter.StartDateFrom.Value.ToUniversalTime();
-                filteredEvents = filteredEvents.Where(e => DateTime.Parse(e.StartDate) >= startDateFrom);
+                var startDateFrom = filter.StartDateFrom.Value;
+                filteredEvents = filteredEvents.Where(e => e.StartDate >= startDateFrom);
             }
             
             if (filter.StartDateTo.HasValue)
             {
-                var startDateTo = filter.StartDateTo.Value.ToUniversalTime();
-                filteredEvents = filteredEvents.Where(e => DateTime.Parse(e.StartDate) <= startDateTo);
+                var startDateTo = filter.StartDateTo.Value;
+                filteredEvents = filteredEvents.Where(e => e.StartDate <= startDateTo);
             }
             
             if (!string.IsNullOrEmpty(filter.Status))
@@ -479,8 +481,8 @@ namespace CultureEvents.API.Controllers
                 case "startdate":
                 default:
                     sortedEvents = filter.SortDescending
-                        ? filteredEvents.OrderByDescending(e => DateTime.Parse(e.StartDate))
-                        : filteredEvents.OrderBy(e => DateTime.Parse(e.StartDate));
+                        ? filteredEvents.OrderByDescending(e => e.StartDate)
+                        : filteredEvents.OrderBy(e => e.StartDate);
                     break;
             }
             

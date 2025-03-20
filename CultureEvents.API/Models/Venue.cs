@@ -5,31 +5,31 @@ namespace CultureEvents.API.Models
     public class Venue : BaseEntity
     {
         [BsonElement("name")]
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         [BsonElement("address")]
-        public string Address { get; set; }
+        public required string Address { get; set; }
 
         [BsonElement("city")]
-        public string City { get; set; }
+        public required string City { get; set; }
 
         [BsonElement("country")]
-        public string Country { get; set; }
+        public required string Country { get; set; }
 
         [BsonElement("capacity")]
         public int Capacity { get; set; }
 
         [BsonElement("location")]
-        public GeoLocation Location { get; set; }
+        public required GeoLocation Location { get; set; }
 
         [BsonElement("image_url")]
-        public string ImageUrl { get; set; }
+        public required string ImageUrl { get; set; }
 
         [BsonElement("description")]
-        public string Description { get; set; }
+        public required string Description { get; set; }
 
         [BsonElement("facilities")]
-        public string[] Facilities { get; set; }
+        public required string[] Facilities { get; set; }
     }
 
     public class GeoLocation

@@ -6,13 +6,13 @@ namespace CultureEvents.API.Models
     public class Ticket : BaseEntity
     {
         [BsonElement("event_id")]
-        public string EventId { get; set; }
+        public required string EventId { get; set; }
 
         [BsonElement("user_id")]
-        public string UserId { get; set; }
+        public required string UserId { get; set; }
 
         [BsonElement("type")]
-        public string Type { get; set; } // Standard, VIP, Premium
+        public required string Type { get; set; } // Standard, VIP, Premium
 
         [BsonElement("price")]
         public decimal Price { get; set; }
@@ -24,9 +24,9 @@ namespace CultureEvents.API.Models
         public string Status { get; set; } = "Active"; // Active, Used, Canceled, Refunded
 
         [BsonElement("seat_number")]
-        public string SeatNumber { get; set; }
+        public required string SeatNumber { get; set; }
 
         [BsonElement("barcode")]
-        public string Barcode { get; set; }
+        public required string Barcode { get; set; }
     }
 }

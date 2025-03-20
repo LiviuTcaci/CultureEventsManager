@@ -46,6 +46,7 @@ namespace CultureEvents.API.Controllers
                 Username = model.Username,
                 PasswordHash = passwordHash,
                 FullName = model.FullName,
+                ProfilePicture = "https://randomuser.me/api/portraits/lego/1.jpg", // Default profile picture
                 Role = "User" // Default role
             };
 
@@ -83,14 +84,14 @@ namespace CultureEvents.API.Controllers
         private string GenerateJwtToken(User user)
         {
             var securityKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_configuration["JwtSettings:Secret"]));
+                Encoding.UTF8.GetBytes(_configuration["JwtSettings:Secret"] ?? "DefaultSecretKeyForDevelopment12345"));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id ?? string.Empty),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role),
+                new Claim(ClaimTypes.Role, user.Role ?? "User"),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
@@ -125,15 +126,15 @@ namespace CultureEvents.API.Controllers
 
     public class RegisterModel
     {
-        public string Email { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
-        public string FullName { get; set; }
+        public required string Email { get; set; }
+        public required string Username { get; set; }
+        public required string Password { get; set; }
+        public required string FullName { get; set; }
     }
 
     public class LoginModel
     {
-        public string Email { get; set; }
-        public string Password { get; set; }
+        public required string Email { get; set; }
+        public required string Password { get; set; }
     }
 }

@@ -11,20 +11,20 @@ namespace CultureEvents.API.Models.DTOs
     {
         [Required]
         [StringLength(100, MinimumLength = 3)]
-        public string Title { get; set; }
+        public required string Title { get; set; }
         
         [Required]
         [StringLength(2000, MinimumLength = 10)]
-        public string Description { get; set; }
+        public required string Description { get; set; }
         
         [Required]
-        public string OrganizerId { get; set; }
+        public required string OrganizerId { get; set; }
         
         [Required]
-        public string CategoryId { get; set; }
+        public required string CategoryId { get; set; }
         
         [Required]
-        public string VenueId { get; set; }
+        public required string VenueId { get; set; }
         
         [Required]
         public DateTime StartDate { get; set; }
@@ -37,7 +37,7 @@ namespace CultureEvents.API.Models.DTOs
         [Required]
         [RegularExpression("^(Announced|Ongoing|Completed|Canceled)$", 
             ErrorMessage = "Status must be one of: Announced, Ongoing, Completed, Canceled")]
-        public string Status { get; set; } = "Announced";
+        public required string Status { get; set; } = "Announced";
         
         [Range(1, int.MaxValue)]
         public int Capacity { get; set; }
@@ -53,31 +53,31 @@ namespace CultureEvents.API.Models.DTOs
     public class UpdateEventDTO
     {
         [StringLength(100, MinimumLength = 3)]
-        public string Title { get; set; }
+        public string? Title { get; set; }
         
         [StringLength(2000, MinimumLength = 10)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
         
-        public string CategoryId { get; set; }
+        public string? CategoryId { get; set; }
         
-        public string VenueId { get; set; }
+        public string? VenueId { get; set; }
         
         public DateTime? StartDate { get; set; }
         
         public DateTime? EndDate { get; set; }
         
-        public List<string> ImageUrls { get; set; }
+        public List<string>? ImageUrls { get; set; }
         
         [RegularExpression("^(Announced|Ongoing|Completed|Canceled)$", 
             ErrorMessage = "Status must be one of: Announced, Ongoing, Completed, Canceled")]
-        public string Status { get; set; }
+        public string? Status { get; set; }
         
         [Range(1, int.MaxValue)]
         public int? Capacity { get; set; }
         
-        public List<string> PerformerIds { get; set; }
+        public List<string>? PerformerIds { get; set; }
         
-        public List<PerformerDetailDTO> PerformerDetails { get; set; }
+        public List<PerformerDetailDTO>? PerformerDetails { get; set; }
     }
 
     /// <summary>
@@ -86,7 +86,7 @@ namespace CultureEvents.API.Models.DTOs
     public class PerformerDetailDTO
     {
         [Required]
-        public string PerformerId { get; set; }
+        public required string PerformerId { get; set; }
         
         [Required]
         [Range(1, int.MaxValue)]
@@ -94,7 +94,7 @@ namespace CultureEvents.API.Models.DTOs
         
         [Required]
         [StringLength(100)]
-        public string Role { get; set; }
+        public required string Role { get; set; }
         
         [Range(1, int.MaxValue)]
         public int DurationMinutes { get; set; }
@@ -105,16 +105,16 @@ namespace CultureEvents.API.Models.DTOs
     /// </summary>
     public class EventFilterDTO
     {
-        public string SearchTerm { get; set; }
-        public string CategoryId { get; set; }
-        public string VenueId { get; set; }
+        public string? SearchTerm { get; set; }
+        public string? CategoryId { get; set; }
+        public string? VenueId { get; set; }
         public DateTime? StartDateFrom { get; set; }
         public DateTime? StartDateTo { get; set; }
-        public string Status { get; set; }
-        public string OrganizerId { get; set; }
+        public string? Status { get; set; }
+        public string? OrganizerId { get; set; }
         public int? Page { get; set; } = 1;
         public int? PageSize { get; set; } = 10;
-        public string SortBy { get; set; } = "StartDate"; // StartDate, Title, Rating
+        public string? SortBy { get; set; } = "StartDate"; // StartDate, Title, Rating
         public bool SortDescending { get; set; } = false;
     }
 
@@ -123,7 +123,7 @@ namespace CultureEvents.API.Models.DTOs
     /// </summary>
     public class PaginatedResult<T>
     {
-        public List<T> Items { get; set; } = new List<T>();
+        public required List<T> Items { get; set; } = new List<T>();
         public int TotalCount { get; set; }
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
