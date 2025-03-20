@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -52,6 +52,9 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ eventId }) => {
   // Menu state
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedComment, setSelectedComment] = useState<Comment | null>(null);
+  
+  // Track which comments the current user has already liked
+  const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
   
   // Delete confirmation
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -183,12 +186,22 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ eventId }) => {
   const handleLike = async (comment: Comment) => {
     if (!isAuthenticated || !user) return;
     
+    // Verificăm dacă utilizatorul a dat deja like la acest comentariu
+    if (likedComments.has(comment.id)) {
+      return; // Nu permitem like-uri multiple de la același utilizator
+    }
+    
     // In a real app, this would call an API to toggle the like
     // For now, just toggle the like in the UI
     const updatedComment = {
       ...comment,
       likes: comment.likes + 1
     };
+    
+    // Adăugăm comentariul la lista de comentarii apreciate
+    const newLikedComments = new Set(likedComments);
+    newLikedComments.add(comment.id);
+    setLikedComments(newLikedComments);
     
     // Update local state
     setComments(comments.map(c => c.id === comment.id ? updatedComment : c));
@@ -272,9 +285,9 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ eventId }) => {
                       <IconButton
                         size="small"
                         onClick={() => handleLike(comment)}
-                        disabled={!isAuthenticated}
+                        disabled={!isAuthenticated || likedComments.has(comment.id)}
                       >
-                        {comment.likes > 0 ? (
+                        {likedComments.has(comment.id) ? (
                           <ThumbUpIcon fontSize="small" color="primary" />
                         ) : (
                           <ThumbUpOutlinedIcon fontSize="small" />

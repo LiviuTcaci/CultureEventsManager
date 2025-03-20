@@ -1,7 +1,11 @@
 import axios, { AxiosResponse } from 'axios';
 
 // Base API configuration
-const API_URL = 'http://localhost:5165/api';
+// When running in Docker, API host is the service name 'api'
+// The protocol and port depend on whether we are in the browser (client-side) or Docker (server-side)
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:5165/api'  // Development on local machine
+  : '/api';                      // Production in Docker container (nginx handles proxy)
 
 export const api = axios.create({
   baseURL: API_URL,

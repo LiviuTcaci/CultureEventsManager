@@ -1,4 +1,5 @@
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import {
   Box,
   Typography,
@@ -11,6 +12,26 @@ import {
 } from '@mui/material';
 
 const Home = () => {
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const handleStartOrganizing = () => {
+    if (isAuthenticated) {
+      if (user?.role === 'Organizer' || user?.role === 'Admin') {
+        if (user?.role === 'Admin') {
+          navigate('/admin');
+        } else {
+          // Pentru moment, arătăm un mesaj că funcționalitatea de creare a evenimentelor este în dezvoltare
+          alert('Funcționalitatea de creare a evenimentelor va fi disponibilă în curând!');
+        }
+      } else {
+        // Pentru utilizatori obișnuiți, afișăm un mesaj sau redirecționăm către o pagină de informații
+        alert('Pentru a crea evenimente, trebuie să aveți cont de organizator. Contactați administratorul pentru mai multe detalii.');
+      }
+    } else {
+      navigate('/register');
+    }
+  };
   return (
     <Box>
       {/* Hero Section */}
@@ -18,15 +39,19 @@ const Home = () => {
         sx={{
           bgcolor: 'primary.main',
           color: 'white',
-          py: 8,
+          py: 3,
           mb: 6,
           borderRadius: 1,
+          minHeight: '25vh',
+          maxWidth: '80%',
+          mx: 'auto',
+          mt: 4
         }}
       >
         <Container maxWidth="md">
           <Typography
             component="h1"
-            variant="h2"
+            variant="h3"
             align="center"
             gutterBottom
           >
@@ -40,7 +65,7 @@ const Home = () => {
             Discover and participate in the most exciting cultural events in your area.
             From concerts and exhibitions to festivals and performances.
           </Typography>
-          <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center', gap: 2 }}>
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center', gap: 2 }}>
             <Button
               variant="contained"
               color="secondary"
@@ -96,7 +121,7 @@ const Home = () => {
                 </Typography>
               </CardContent>
               <CardActions>
-                <Button size="small" component={RouterLink} to="/register">
+                <Button size="small" onClick={handleStartOrganizing}>
                   Start Organizing
                 </Button>
               </CardActions>

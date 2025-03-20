@@ -504,7 +504,7 @@ const EventManagement: React.FC = () => {
       </TableContainer>
       
       {/* Create/Edit Event Modal */}
-      <Dialog open={openModal} onClose={handleCloseModal} maxWidth="md" fullWidth>
+      <Dialog open={openModal} onClose={handleCloseModal} fullWidth>
         <DialogTitle>
           {modalMode === 'create' ? 'Create New Event' : 'Edit Event'}
         </DialogTitle>

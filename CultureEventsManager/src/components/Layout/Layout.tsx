@@ -8,39 +8,43 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <>
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      minHeight: '100dvh',
+      bgcolor: 'background.default'
+    }}>
       <CssBaseline />
-      <Box
-        sx={{
+      <Navbar />
+      <Box 
+        component="main" 
+        sx={{ 
+          flex: 1,
           display: 'flex',
           flexDirection: 'column',
-          minHeight: '100vh',
+          width: '100%',
         }}
       >
-        <Navbar />
-        <Container component="main" sx={{ flexGrow: 1, py: 4 }}>
-          {children}
-        </Container>
-        <Box
-          component="footer"
-          sx={{
-            py: 3,
-            px: 2,
-            mt: 'auto',
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'light'
-                ? theme.palette.grey[200]
-                : theme.palette.grey[800],
-          }}
-        >
-          <Container maxWidth="sm">
-            <Box textAlign="center">
-              <p>© {new Date().getFullYear()} Cultural Events Management Platform</p>
-            </Box>
-          </Container>
-        </Box>
+        {children}
       </Box>
-    </>
+      <Box
+        component="footer"
+        sx={{
+          py: 3,
+          px: 2,
+          bgcolor: (theme) =>
+            theme.palette.mode === 'light'
+              ? theme.palette.grey[200]
+              : theme.palette.grey[800],
+        }}
+      >
+        <Container>
+          <Box textAlign="center">
+            <p>© {new Date().getFullYear()} Cultural Events Management Platform</p>
+          </Box>
+        </Container>
+      </Box>
+    </Box>
   );
 };
 

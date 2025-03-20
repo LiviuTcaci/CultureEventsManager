@@ -22,10 +22,10 @@ namespace CultureEvents.API.Models
         public string VenueId { get; set; }
 
         [BsonElement("start_date")]
-        public DateTime StartDate { get; set; }
+        public string StartDate { get; set; }
 
         [BsonElement("end_date")]
-        public DateTime EndDate { get; set; }
+        public string EndDate { get; set; }
 
         [BsonElement("image_urls")]
         public List<string> ImageUrls { get; set; } = new List<string>();

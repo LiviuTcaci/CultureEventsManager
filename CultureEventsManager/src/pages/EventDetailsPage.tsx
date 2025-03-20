@@ -148,8 +148,22 @@ const EventDetailsPage: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="lg">
-      {/* Notification Snackbar */}
+    <Box sx={{ 
+      display: 'flex',
+      flexDirection: 'column',
+      flex: 1,
+      width: '100%',
+      height: '100%',
+      overflow: 'hidden'
+    }}>
+      <Container maxWidth="lg" sx={{ 
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+        height: '100%',
+        overflow: 'auto'
+      }}>
+        {/* Notification Snackbar */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={4000}
@@ -396,7 +410,8 @@ const EventDetailsPage: React.FC = () => {
           <CommentsSection eventId={event.id} />
         </Box>
       </Box>
-    </Container>
+      </Container>
+    </Box>
   );
 };
 

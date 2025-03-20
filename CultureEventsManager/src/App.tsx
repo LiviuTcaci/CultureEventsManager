@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material';
 import Layout from './components/Layout/Layout';
 import { AuthProvider } from './context/AuthContext';
@@ -14,10 +14,8 @@ import RegisterPage from './pages/RegisterPage';
 import AdminPanel from './pages/AdminPanel';
 import ProfilePage from './pages/ProfilePage';
 import TicketPurchasePage from './pages/TicketPurchasePage';
-
-// Placeholder components - to be implemented later
-const Venues = () => <div>Venues Page</div>;
-
+import VenuesPage from './pages/VenuesPage';
+import './App.css';
 const theme = createTheme({
   palette: {
     primary: {
@@ -53,7 +51,7 @@ function App() {
               <Route path="/events" element={<EventsPage />} />
               <Route path="/events/:eventId" element={<EventDetailsPage />} />
               <Route path="/events/:eventId/tickets" element={<TicketPurchasePage />} />
-              <Route path="/venues" element={<Venues />} />
+              <Route path="/venues" element={<VenuesPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               
@@ -66,6 +64,9 @@ function App() {
               <Route element={<ProtectedRoute requiredRole="Admin" />}>
                 <Route path="/admin" element={<AdminPanel />} />
               </Route>
+              
+              {/* Fallback route for any other paths to redirect to Home */}
+              <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Layout>
           </NotificationProvider>

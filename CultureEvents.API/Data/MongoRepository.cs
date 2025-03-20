@@ -54,7 +54,7 @@ namespace CultureEvents.API.Data
 
         public async Task<bool> UpdateAsync(T entity)
         {
-            entity.UpdatedAt = DateTime.UtcNow;
+            entity.UpdatedAt = DateTime.UtcNow.ToString("o");
             
             var result = await _collection.ReplaceOneAsync(
                 e => e.Id == entity.Id && !e.IsDeleted,
@@ -74,7 +74,7 @@ namespace CultureEvents.API.Data
         {
             var update = Builders<T>.Update
                 .Set(e => e.IsDeleted, true)
-                .Set(e => e.UpdatedAt, DateTime.UtcNow);
+                .Set(e => e.UpdatedAt, DateTime.UtcNow.ToString("o"));
                 
             var result = await _collection.UpdateOneAsync(
                 e => e.Id == id && !e.IsDeleted,

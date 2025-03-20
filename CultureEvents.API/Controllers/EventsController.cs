@@ -31,29 +31,22 @@ namespace CultureEvents.API.Controllers
         /// <summary>
         /// Gets all events with optional pagination
         /// </summary>
-        /// <param name="page">Page number (default: 1)</param>
-        /// <param name="pageSize">Page size (default: 10)</param>
-        /// <returns>List of events</returns>
         [HttpGet]
         [ProducesResponseType(typeof(PaginatedResult<Event>), 200)]
         public async Task<ActionResult<PaginatedResult<Event>>> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            // Validate pagination parameters
             if (page < 1) page = 1;
             if (pageSize < 1 || pageSize > 50) pageSize = 10;
             
-            // Get total count of non-deleted events
             var totalCount = await _eventRepository.CountAsync(e => !e.IsDeleted);
             
-            // Get paginated events
             var events = (await _eventRepository.GetAllAsync())
                 .Where(e => !e.IsDeleted)
-                .OrderByDescending(e => e.StartDate)
+                .OrderByDescending(e => DateTime.Parse(e.StartDate))
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
             
-            // Create paginated result
             var result = new PaginatedResult<Event>
             {
                 Items = events,
@@ -68,8 +61,6 @@ namespace CultureEvents.API.Controllers
         /// <summary>
         /// Gets an event by ID
         /// </summary>
-        /// <param name="id">Event ID</param>
-        /// <returns>Event</returns>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(Event), 200)]
         [ProducesResponseType(404)]
@@ -93,23 +84,16 @@ namespace CultureEvents.API.Controllers
         /// <summary>
         /// Creates a new event
         /// </summary>
-        /// <param name="eventDto">Event data</param>
-        /// <returns>Created event</returns>
         [HttpPost]
         [Authorize(Roles = "Organizer,Admin")]
         [ProducesResponseType(typeof(Event), 201)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
         public async Task<ActionResult<Event>> Create(CreateEventDTO eventDto)
         {
-            // Validate input
             if (eventDto == null)
             {
                 return BadRequest("Event data is required");
             }
             
-            // Validate foreign keys
             if (!await _categoryRepository.ExistsAsync(eventDto.CategoryId))
             {
                 return BadRequest($"Category with ID {eventDto.CategoryId} does not exist");
@@ -120,7 +104,6 @@ namespace CultureEvents.API.Controllers
                 return BadRequest($"Venue with ID {eventDto.VenueId} does not exist");
             }
             
-            // Validate dates
             if (eventDto.EndDate <= eventDto.StartDate)
             {
                 return BadRequest("End date must be after start date");
@@ -131,7 +114,6 @@ namespace CultureEvents.API.Controllers
                 return BadRequest("Start date cannot be in the past");
             }
             
-            // Create a new event entity
             var newEvent = new Event
             {
                 Title = eventDto.Title,
@@ -139,8 +121,8 @@ namespace CultureEvents.API.Controllers
                 OrganizerId = eventDto.OrganizerId,
                 CategoryId = eventDto.CategoryId,
                 VenueId = eventDto.VenueId,
-                StartDate = eventDto.StartDate.ToString("o"),
-                EndDate = eventDto.EndDate.ToString("o"),
+                StartDate = eventDto.StartDate.ToUniversalTime().ToString("o"),
+                EndDate = eventDto.EndDate.ToUniversalTime().ToString("o"),
                 ImageUrls = eventDto.ImageUrls,
                 Status = eventDto.Status,
                 Capacity = eventDto.Capacity,
@@ -157,7 +139,6 @@ namespace CultureEvents.API.Controllers
                 }).ToList()
             };
             
-            // Save to database
             await _eventRepository.CreateAsync(newEvent);
             
             return CreatedAtAction(nameof(GetById), new { id = newEvent.Id }, newEvent);
@@ -166,16 +147,9 @@ namespace CultureEvents.API.Controllers
         /// <summary>
         /// Updates an existing event
         /// </summary>
-        /// <param name="id">Event ID</param>
-        /// <param name="eventDto">Event data to update</param>
-        /// <returns>No content</returns>
         [HttpPut("{id}")]
         [Authorize(Roles = "Organizer,Admin")]
         [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        [ProducesResponseType(404)]
         public async Task<IActionResult> Update(string id, UpdateEventDTO eventDto)
         {
             if (string.IsNullOrEmpty(id))
@@ -188,7 +162,6 @@ namespace CultureEvents.API.Controllers
                 return BadRequest("Event data is required");
             }
             
-            // Check if event exists
             var existingEvent = await _eventRepository.GetByIdAsync(id);
             
             if (existingEvent == null || existingEvent.IsDeleted)
@@ -196,30 +169,22 @@ namespace CultureEvents.API.Controllers
                 return NotFound("Event not found");
             }
             
-            // Check if user is authorized (only organizer and admin of the event can update it)
-            // This would need to be implemented with claims or user service
-            // For now, we're just checking if the event exists
-            
-            // Check if Category exists if provided
             if (!string.IsNullOrEmpty(eventDto.CategoryId) && !await _categoryRepository.ExistsAsync(eventDto.CategoryId))
             {
                 return BadRequest($"Category with ID {eventDto.CategoryId} does not exist");
             }
             
-            // Check if Venue exists if provided
             if (!string.IsNullOrEmpty(eventDto.VenueId) && !await _venueRepository.ExistsAsync(eventDto.VenueId))
             {
                 return BadRequest($"Venue with ID {eventDto.VenueId} does not exist");
             }
             
-            // Check dates
             if (eventDto.StartDate.HasValue && eventDto.EndDate.HasValue && 
                 eventDto.EndDate.Value <= eventDto.StartDate.Value)
             {
                 return BadRequest("End date must be after start date");
             }
             
-            // Update event properties (only if provided)
             if (!string.IsNullOrEmpty(eventDto.Title))
                 existingEvent.Title = eventDto.Title;
                 
@@ -233,10 +198,10 @@ namespace CultureEvents.API.Controllers
                 existingEvent.VenueId = eventDto.VenueId;
                 
             if (eventDto.StartDate.HasValue)
-                existingEvent.StartDate = eventDto.StartDate.Value.ToString("o");
+                existingEvent.StartDate = eventDto.StartDate.Value.ToUniversalTime().ToString("o");
                 
             if (eventDto.EndDate.HasValue)
-                existingEvent.EndDate = eventDto.EndDate.Value.ToString("o");
+                existingEvent.EndDate = eventDto.EndDate.Value.ToUniversalTime().ToString("o");
                 
             if (eventDto.ImageUrls != null)
                 existingEvent.ImageUrls = eventDto.ImageUrls;
@@ -259,10 +224,8 @@ namespace CultureEvents.API.Controllers
                     DurationMinutes = pd.DurationMinutes
                 }).ToList();
             
-            // Update timestamp
             existingEvent.UpdatedAt = DateTime.UtcNow.ToString("o");
             
-            // Save to database
             await _eventRepository.UpdateAsync(existingEvent);
             
             return NoContent();
@@ -271,15 +234,9 @@ namespace CultureEvents.API.Controllers
         /// <summary>
         /// Deletes an event (soft delete)
         /// </summary>
-        /// <param name="id">Event ID</param>
-        /// <returns>No content</returns>
         [HttpDelete("{id}")]
         [Authorize(Roles = "Organizer,Admin")]
         [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        [ProducesResponseType(404)]
         public async Task<IActionResult> Delete(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -294,10 +251,6 @@ namespace CultureEvents.API.Controllers
                 return NotFound("Event not found");
             }
             
-            // Check if user is authorized (only organizer and admin of the event can delete it)
-            // This would need to be implemented with claims or user service
-            // For now, we're just checking if the event exists
-            
             await _eventRepository.SoftDeleteAsync(id);
             return NoContent();
         }
@@ -305,17 +258,16 @@ namespace CultureEvents.API.Controllers
         /// <summary>
         /// Gets upcoming events
         /// </summary>
-        /// <returns>List of upcoming events</returns>
         [HttpGet("upcoming")]
         [ProducesResponseType(typeof(List<Event>), 200)]
         public async Task<ActionResult<IEnumerable<Event>>> GetUpcoming([FromQuery] int limit = 10)
         {
-            var now = DateTime.UtcNow.ToString("o");
+            var now = DateTime.UtcNow;
             
             var events = (await _eventRepository.FindAsync(e => 
                     !e.IsDeleted && 
-                    (e.Status == "Announced" || e.Status == "Ongoing") &&
-                    string.Compare(e.StartDate, now) > 0))
+                    (e.Status == "Announced" || e.Status == "Ongoing")))
+                .Where(e => DateTime.Parse(e.StartDate) > now)
                 .OrderBy(e => e.StartDate)
                 .Take(limit)
                 .ToList();
@@ -326,12 +278,8 @@ namespace CultureEvents.API.Controllers
         /// <summary>
         /// Gets events by category
         /// </summary>
-        /// <param name="categoryId">Category ID</param>
-        /// <returns>List of events in the category</returns>
         [HttpGet("category/{categoryId}")]
         [ProducesResponseType(typeof(List<Event>), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
         public async Task<ActionResult<IEnumerable<Event>>> GetByCategory(string categoryId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             if (string.IsNullOrEmpty(categoryId))
@@ -339,29 +287,24 @@ namespace CultureEvents.API.Controllers
                 return BadRequest("Category ID cannot be empty");
             }
             
-            // Check if category exists
             if (!await _categoryRepository.ExistsAsync(categoryId))
             {
                 return NotFound($"Category with ID {categoryId} not found");
             }
             
-            // Validate pagination parameters
             if (page < 1) page = 1;
             if (pageSize < 1 || pageSize > 50) pageSize = 10;
             
-            // Get total count for this category
             var totalCount = await _eventRepository.CountAsync(e => 
                 !e.IsDeleted && e.CategoryId == categoryId);
             
-            // Get events by category with pagination
             var events = (await _eventRepository.FindAsync(e => 
                     !e.IsDeleted && e.CategoryId == categoryId))
-                .OrderByDescending(e => e.StartDate)
+                .OrderByDescending(e => DateTime.Parse(e.StartDate))
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
             
-            // Create paginated result
             var result = new PaginatedResult<Event>
             {
                 Items = events,
@@ -376,12 +319,8 @@ namespace CultureEvents.API.Controllers
         /// <summary>
         /// Gets events by venue
         /// </summary>
-        /// <param name="venueId">Venue ID</param>
-        /// <returns>List of events at the venue</returns>
         [HttpGet("venue/{venueId}")]
         [ProducesResponseType(typeof(List<Event>), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
         public async Task<ActionResult<IEnumerable<Event>>> GetByVenue(string venueId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             if (string.IsNullOrEmpty(venueId))
@@ -389,29 +328,24 @@ namespace CultureEvents.API.Controllers
                 return BadRequest("Venue ID cannot be empty");
             }
             
-            // Check if venue exists
             if (!await _venueRepository.ExistsAsync(venueId))
             {
                 return NotFound($"Venue with ID {venueId} not found");
             }
             
-            // Validate pagination parameters
             if (page < 1) page = 1;
             if (pageSize < 1 || pageSize > 50) pageSize = 10;
             
-            // Get total count for this venue
             var totalCount = await _eventRepository.CountAsync(e => 
                 !e.IsDeleted && e.VenueId == venueId);
             
-            // Get events by venue with pagination
             var events = (await _eventRepository.FindAsync(e => 
                     !e.IsDeleted && e.VenueId == venueId))
-                .OrderByDescending(e => e.StartDate)
+                .OrderByDescending(e => DateTime.Parse(e.StartDate))
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
             
-            // Create paginated result
             var result = new PaginatedResult<Event>
             {
                 Items = events,
@@ -426,11 +360,8 @@ namespace CultureEvents.API.Controllers
         /// <summary>
         /// Searches for events
         /// </summary>
-        /// <param name="term">Search term</param>
-        /// <returns>List of matching events</returns>
         [HttpGet("search")]
         [ProducesResponseType(typeof(List<Event>), 200)]
-        [ProducesResponseType(400)]
         public async Task<ActionResult<IEnumerable<Event>>> Search([FromQuery] string term, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             if (string.IsNullOrEmpty(term))
@@ -438,33 +369,26 @@ namespace CultureEvents.API.Controllers
                 return BadRequest("Search term cannot be empty");
             }
             
-            // Validate pagination parameters
             if (page < 1) page = 1;
             if (pageSize < 1 || pageSize > 50) pageSize = 10;
             
-            // Convert search term to lowercase for case-insensitive search
             var lowerTerm = term.ToLower();
             
-            // Get all events (not ideal for large datasets, but MongoDB repository doesn't support text search in our implementation)
             var allEvents = await _eventRepository.GetAllAsync();
             
-            // Filter by search term
             var filteredEvents = allEvents
                 .Where(e => !e.IsDeleted && (
                     e.Title.ToLower().Contains(lowerTerm) ||
                     e.Description.ToLower().Contains(lowerTerm)))
-                .OrderByDescending(e => e.StartDate);
+                .OrderByDescending(e => DateTime.Parse(e.StartDate));
             
-            // Get total count
             var totalCount = filteredEvents.Count();
             
-            // Paginate results
             var paginatedEvents = filteredEvents
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
             
-            // Create paginated result
             var result = new PaginatedResult<Event>
             {
                 Items = paginatedEvents,
@@ -479,8 +403,6 @@ namespace CultureEvents.API.Controllers
         /// <summary>
         /// Filters events by various criteria
         /// </summary>
-        /// <param name="filter">Filter criteria</param>
-        /// <returns>List of filtered events</returns>
         [HttpPost("filter")]
         [ProducesResponseType(typeof(PaginatedResult<Event>), 200)]
         public async Task<ActionResult<PaginatedResult<Event>>> Filter([FromBody] EventFilterDTO filter)
@@ -490,20 +412,16 @@ namespace CultureEvents.API.Controllers
                 filter = new EventFilterDTO();
             }
             
-            // Validate pagination parameters
             int page = filter.Page ?? 1;
             int pageSize = filter.PageSize ?? 10;
             
             if (page < 1) page = 1;
             if (pageSize < 1 || pageSize > 50) pageSize = 10;
             
-            // Get all events (not ideal for large datasets, but necessary for our implementation)
             var allEvents = await _eventRepository.GetAllAsync();
             
-            // Apply filters
             var filteredEvents = allEvents.Where(e => !e.IsDeleted);
             
-            // Search term
             if (!string.IsNullOrEmpty(filter.SearchTerm))
             {
                 var lowerTerm = filter.SearchTerm.ToLower();
@@ -512,44 +430,38 @@ namespace CultureEvents.API.Controllers
                     e.Description.ToLower().Contains(lowerTerm));
             }
             
-            // Category
             if (!string.IsNullOrEmpty(filter.CategoryId))
             {
                 filteredEvents = filteredEvents.Where(e => e.CategoryId == filter.CategoryId);
             }
             
-            // Venue
             if (!string.IsNullOrEmpty(filter.VenueId))
             {
                 filteredEvents = filteredEvents.Where(e => e.VenueId == filter.VenueId);
             }
             
-            // Date range
             if (filter.StartDateFrom.HasValue)
             {
-                var startDateFrom = filter.StartDateFrom.Value.ToString("o");
-                filteredEvents = filteredEvents.Where(e => string.Compare(e.StartDate, startDateFrom) >= 0);
+                var startDateFrom = filter.StartDateFrom.Value.ToUniversalTime();
+                filteredEvents = filteredEvents.Where(e => DateTime.Parse(e.StartDate) >= startDateFrom);
             }
             
             if (filter.StartDateTo.HasValue)
             {
-                var startDateTo = filter.StartDateTo.Value.ToString("o");
-                filteredEvents = filteredEvents.Where(e => string.Compare(e.StartDate, startDateTo) <= 0);
+                var startDateTo = filter.StartDateTo.Value.ToUniversalTime();
+                filteredEvents = filteredEvents.Where(e => DateTime.Parse(e.StartDate) <= startDateTo);
             }
             
-            // Status
             if (!string.IsNullOrEmpty(filter.Status))
             {
                 filteredEvents = filteredEvents.Where(e => e.Status == filter.Status);
             }
             
-            // Organizer
             if (!string.IsNullOrEmpty(filter.OrganizerId))
             {
                 filteredEvents = filteredEvents.Where(e => e.OrganizerId == filter.OrganizerId);
             }
             
-            // Sorting
             IOrderedEnumerable<Event> sortedEvents;
             
             switch (filter.SortBy?.ToLower())
@@ -567,21 +479,18 @@ namespace CultureEvents.API.Controllers
                 case "startdate":
                 default:
                     sortedEvents = filter.SortDescending
-                        ? filteredEvents.OrderByDescending(e => e.StartDate)
-                        : filteredEvents.OrderBy(e => e.StartDate);
+                        ? filteredEvents.OrderByDescending(e => DateTime.Parse(e.StartDate))
+                        : filteredEvents.OrderBy(e => DateTime.Parse(e.StartDate));
                     break;
             }
             
-            // Get total count
             var totalCount = sortedEvents.Count();
             
-            // Paginate results
             var paginatedEvents = sortedEvents
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
             
-            // Create paginated result
             var result = new PaginatedResult<Event>
             {
                 Items = paginatedEvents,

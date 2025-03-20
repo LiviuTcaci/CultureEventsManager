@@ -97,8 +97,8 @@ namespace CultureEvents.API.Controllers
                     Name = "Test Category " + DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
                     Description = "Created by diagnostics controller",
                     Icon = "test_icon",
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
+                    CreatedAt = DateTime.UtcNow.ToString("o"),
+                    UpdatedAt = DateTime.UtcNow.ToString("o"),
                     IsDeleted = false
                 };
 

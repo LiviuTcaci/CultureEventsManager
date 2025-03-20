@@ -78,15 +78,15 @@ const EventList: React.FC<EventListProps> = ({ categoryId, searchQuery, limit })
   }
 
   return (
-    <Container>
-      <Grid container spacing={3}>
+    <Box sx={{ width: '100%', px: 2 }}>
+      <Grid container spacing={3} justifyContent="center">
         {events.map((event) => (
-          <Grid item xs={12} sm={6} md={4} key={event.id}>
+          <Grid item xs={12} sm={6} md={4} lg={3} key={event.id}>
             <EventCard event={event} onViewDetails={handleViewDetails} />
           </Grid>
         ))}
       </Grid>
-    </Container>
+    </Box>
   );
 };
 
